@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GameState, Unit, MapNode, Grade } from './types';
 import { BASE_UNITS, MAX_FLOORS } from './constants';
 import { generateMap } from './services/gameService';
@@ -30,7 +30,6 @@ const App: React.FC = () => {
   const [battleNode, setBattleNode] = useState<MapNode | null>(null);
   const [activeUnits, setActiveUnits] = useState<Unit[]>([]);
 
-  // Initialize game
   useEffect(() => {
     const initialMap = generateMap();
     setGameState(prev => ({ ...prev, map: initialMap }));
@@ -70,7 +69,7 @@ const App: React.FC = () => {
           essence: prev.essence + (battleNode?.type === 'Boss' ? 100 : 10),
           map: newMap,
           currentNodeId: battleNode?.id || null,
-          currentFloor: (battleNode?.floor || 1) + 1
+          currentFloor: Math.min(MAX_FLOORS, (battleNode?.floor || 1) + 1)
         };
       });
       setActiveUnits(survivingUnits);
@@ -90,89 +89,93 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="w-full h-screen bg-black text-white relative overflow-hidden select-none">
-      {scene === 'LOBBY' && (
-        <Lobby 
-          gameState={gameState} 
-          setGameState={setGameState} 
-          onStartRun={startRun} 
-        />
-      )}
+    <div className="w-full h-[100dvh] bg-black text-white relative overflow-hidden select-none touch-none">
+      {/* Global Header - Mobile Optimized Pill */}
+      <div className="fixed top-2 left-1/2 -translate-x-1/2 w-[95%] max-w-md flex justify-around items-center bg-zinc-900/80 backdrop-blur-lg px-4 py-2 rounded-full border border-white/10 z-[100] shadow-2xl safe-top">
+        <div className="flex items-center gap-1.5">
+          <span className="text-yellow-500 text-sm">🪙</span>
+          <span className="font-mono text-xs font-bold">{gameState.gold}</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-blue-400 text-sm">💎</span>
+          <span className="font-mono text-xs font-bold">{gameState.magicStones}</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-purple-500 text-sm">🟣</span>
+          <span className="font-mono text-xs font-bold">{gameState.essence}</span>
+        </div>
+      </div>
 
-      {scene === 'MAP' && (
-        <MapView 
-          gameState={gameState} 
-          onNodeSelect={onNodeSelect} 
-        />
-      )}
+      <div className="w-full h-full scene-transition">
+        {scene === 'LOBBY' && (
+          <Lobby 
+            gameState={gameState} 
+            setGameState={setGameState} 
+            onStartRun={startRun} 
+          />
+        )}
 
-      {scene === 'COMBAT' && battleNode && (
-        <CombatScene 
-          gameState={gameState}
-          setGameState={setGameState}
-          node={battleNode}
-          initialActiveUnits={activeUnits}
-          onBattleEnd={onBattleEnd}
-        />
-      )}
+        {scene === 'MAP' && (
+          <MapView 
+            gameState={gameState} 
+            onNodeSelect={onNodeSelect} 
+          />
+        )}
 
-      {scene === 'REWARD' && (
-        <div className="absolute inset-0 bg-black/90 flex flex-center flex-col items-center justify-center p-8">
-          <h2 className="text-3xl font-cinzel text-yellow-500 mb-8">전투 승리! 유닛을 선택하세요</h2>
-          <div className="flex gap-6">
-            {[...Array(3)].map((_, i) => {
-              const u = BASE_UNITS[Math.floor(Math.random() * BASE_UNITS.length)];
-              const reward = { ...u, id: `reward-${Date.now()}-${i}`, grade: Grade.MAGIC };
-              return (
-                <div 
-                  key={i}
-                  className="p-6 bg-zinc-900 border-2 border-zinc-700 hover:border-yellow-500 cursor-pointer rounded-lg flex flex-col items-center transition-all transform hover:scale-105"
-                  onClick={() => onRewardSelect(reward)}
-                >
-                  <span className="text-6xl mb-4">{reward.icon}</span>
-                  <p className="font-bold text-lg">{reward.name}</p>
-                  <p className="text-sm text-green-400">매직 등급</p>
-                  <div className="mt-4 space-y-1 text-xs text-zinc-400">
-                    <p>공격력: {reward.atk}</p>
-                    <p>체력: {reward.hp}</p>
+        {scene === 'COMBAT' && battleNode && (
+          <CombatScene 
+            gameState={gameState}
+            setGameState={setGameState}
+            node={battleNode}
+            initialActiveUnits={activeUnits}
+            onBattleEnd={onBattleEnd}
+          />
+        )}
+
+        {scene === 'REWARD' && (
+          <div className="absolute inset-0 bg-black/95 flex flex-col items-center justify-center p-6 z-[110]">
+            <h2 className="text-2xl font-cinzel text-yellow-500 mb-8 text-center">전투 승리!<br/>전리품 선택</h2>
+            <div className="w-full flex flex-col gap-4">
+              {[...Array(3)].map((_, i) => {
+                const u = BASE_UNITS[Math.floor(Math.random() * BASE_UNITS.length)];
+                const reward = { ...u, id: `reward-${Date.now()}-${i}`, grade: Grade.MAGIC };
+                return (
+                  <div 
+                    key={i}
+                    className="w-full p-4 bg-zinc-900 border border-zinc-700 active:border-yellow-500 rounded-xl flex items-center gap-4 transition-all"
+                    onClick={() => onRewardSelect(reward)}
+                  >
+                    <span className="text-4xl">{reward.icon}</span>
+                    <div className="flex-1">
+                      <p className="font-bold text-lg leading-tight">{reward.name}</p>
+                      <p className="text-xs text-green-400">매직 등급</p>
+                    </div>
+                    <div className="text-right text-[10px] text-zinc-400">
+                      <p>ATK: {reward.atk}</p>
+                      <p>HP: {reward.hp}</p>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {scene === 'SHOP' && (
-        <ShopScene 
-          gameState={gameState} 
-          setGameState={setGameState} 
-          onExit={() => setScene('MAP')} 
-        />
-      )}
+        {scene === 'SHOP' && (
+          <ShopScene 
+            gameState={gameState} 
+            setGameState={setGameState} 
+            onExit={() => setScene('MAP')} 
+          />
+        )}
 
-      {scene === 'BARRACKS' && (
-        <BarracksScene 
-          gameState={gameState} 
-          setGameState={setGameState} 
-          onExit={() => setScene('MAP')} 
-        />
-      )}
-
-      {/* Global UI Elements */}
-      <div className="fixed top-4 right-4 flex gap-4 bg-black/60 p-3 rounded-full border border-red-900/50 backdrop-blur-md z-50">
-        <div className="flex items-center gap-2">
-          <span className="text-yellow-500">🪙</span>
-          <span className="font-mono">{gameState.gold}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-blue-400">💎</span>
-          <span className="font-mono">{gameState.magicStones}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-purple-500">🟣</span>
-          <span className="font-mono">{gameState.essence}</span>
-        </div>
+        {scene === 'BARRACKS' && (
+          <BarracksScene 
+            gameState={gameState} 
+            setGameState={setGameState} 
+            onExit={() => setScene('MAP')} 
+          />
+        )}
       </div>
     </div>
   );

@@ -3,7 +3,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Hell's Defense: Angel Slayer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
@@ -15,11 +15,31 @@
             color: #e2e2e2;
             font-family: 'Noto Sans KR', sans-serif;
             overflow: hidden;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
         .font-cinzel { font-family: 'Cinzel', serif; }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: #1a1a1a; }
-        ::-webkit-scrollbar-thumb { background: #b91c1c; border-radius: 2px; }
+        ::-webkit-scrollbar { width: 0px; } /* Hide scrollbars for mobile feel */
+        
+        .safe-bottom {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .safe-top {
+            padding-top: env(safe-area-inset-top);
+        }
+        
+        /* Smooth transitions for mobile */
+        .scene-transition {
+            transition: opacity 0.3s ease-in-out;
+        }
+        
+        @keyframes pulse-red {
+            0%, 100% { box-shadow: 0 0 5px #ef4444; }
+            50% { box-shadow: 0 0 20px #ef4444; }
+        }
+        .active-node {
+            animation: pulse-red 2s infinite;
+        }
     </style>
 <script type="importmap">
 {

@@ -14,6 +14,7 @@ const ShopScene: React.FC<Props> = ({ gameState, setGameState, onExit }) => {
     { ...BASE_UNITS[0], id: 'shop-1', price: 200, grade: Grade.RARE },
     { ...BASE_UNITS[1], id: 'shop-2', price: 300, grade: Grade.EPIC },
     { ...BASE_UNITS[2], id: 'shop-3', price: 150, grade: Grade.MAGIC },
+    { ...BASE_UNITS[3], id: 'shop-4', price: 400, grade: Grade.UNIQUE },
   ];
 
   const buyUnit = (unit: any) => {
@@ -27,29 +28,38 @@ const ShopScene: React.FC<Props> = ({ gameState, setGameState, onExit }) => {
   };
 
   return (
-    <div className="w-full h-full bg-black/90 flex flex-col items-center justify-center p-12">
-      <h2 className="text-4xl font-cinzel text-yellow-500 mb-12">마계 암시장</h2>
-      <div className="flex gap-8 mb-12">
+    <div className="w-full h-full bg-black flex flex-col pt-16 px-6 pb-10">
+      <div className="text-center mb-8">
+        <h2 className="text-2xl font-cinzel text-yellow-500">ABYSSAL MARKET</h2>
+        <p className="text-[10px] text-zinc-500 uppercase tracking-widest">Trade your souls for power</p>
+      </div>
+
+      <div className="flex-1 overflow-y-auto space-y-4 pr-1">
         {shopUnits.map((u) => (
           <div 
             key={u.id}
-            className="p-8 bg-zinc-900 border-2 border-zinc-700 hover:border-yellow-500 cursor-pointer rounded-xl flex flex-col items-center min-w-[200px]"
+            className="p-4 bg-zinc-900/80 border border-zinc-800 active:border-yellow-500 rounded-2xl flex items-center gap-4 transition-all"
             onClick={() => buyUnit(u)}
           >
-            <span className="text-6xl mb-4">{u.icon}</span>
-            <p className="font-bold text-xl">{u.name}</p>
-            <p className={`${GRADE_COLORS[u.grade]} mb-4`}>{u.grade}</p>
-            <div className="bg-yellow-900/40 px-4 py-2 rounded-full border border-yellow-700 text-yellow-500 font-bold">
-              🪙 {u.price} G
+            <span className="text-5xl">{u.icon}</span>
+            <div className="flex-1">
+              <p className="font-bold text-lg">{u.name}</p>
+              <p className={`text-xs ${GRADE_COLORS[u.grade]}`}>{u.grade}</p>
+            </div>
+            <div className="flex flex-col items-end">
+              <span className="text-yellow-500 font-mono font-bold">🪙 {u.price}</span>
+              <span className="text-[8px] text-zinc-500">TAP TO BUY</span>
             </div>
           </div>
         ))}
       </div>
+
       <button 
         onClick={onExit}
-        className="px-12 py-4 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg font-bold"
+        className="mt-8 w-full py-4 bg-zinc-800 active:bg-zinc-700 text-white rounded-2xl font-bold flex items-center justify-center gap-2"
       >
-        마을로 돌아가기
+        <span>원정으로 돌아가기</span>
+        <span>🚪</span>
       </button>
     </div>
   );
